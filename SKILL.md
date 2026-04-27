@@ -12,7 +12,7 @@ metadata:
 prerequisites:
   environment:
     - QDRANT_HOST
-    - QDRANT_PORT
+    - QDRANT_PORT (optional, default: 6334 — REST-only; gRPC not supported on this port)
     - QDRANT_COLLECTION
     - BOT_ID
     - EMBEDDING_MODEL (optional, default: all-MiniLM-L6-v2; 384dim, tested with sentence-transformers local embeddings)
@@ -62,7 +62,7 @@ Hermes Instance                    Central Qdrant
 │  vector-memory/        │        │                       │
 │  └── __init__.py      │        │  Points:              │
 │     (MemoryProvider)  │        │  • id (uuid)          │
-│                        │        │  • vector (1024dim)   │
+│                        │        │  • vector (384dim for all-MiniLM-L6-v2; match to collection's actual dim)   │
 │  skills/              │        │  • payload:           │
 │  memory/              │        │    text, type, tags,  │
 │  vector-memory/       │        │    timestamp, meta    │
@@ -96,7 +96,7 @@ Set environment variables for each Hermes instance:
 ```bash
 # Required — point all bots to the same central Qdrant
 export QDRANT_HOST=10.0.1.50
-export QDRANT_PORT=6333
+export QDRANT_PORT=6334
 export QDRANT_COLLECTION=hermes_memory
 
 # Per-bot — this is the namespace
@@ -205,11 +205,12 @@ The `BOT_ID` env var determines the namespace. Bots never see each other's memor
 
 ## Embedding Providers
 
-**Local (default — BGE-m3):**
+**Local (default — all-MiniLM-L6-v2, 384dim):**
 ```bash
 export EMBEDDING_PROVIDER=local
-export EMBEDDING_MODEL=BAAI/bge-m3
+export EMBEDDING_MODEL=all-MiniLM-L6-v2
 ```
+*(BGE-m3 also supported but uses 1024dim — ensure collection dim matches)*
 
 **OpenAI:**
 ```bash
