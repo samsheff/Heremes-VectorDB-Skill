@@ -15,7 +15,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, OptimizersConfig, HnswConfig
+from qdrant_client.models import Distance, VectorParams, OptimizersConfigDiff, HnswConfigDiff
 
 
 QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
@@ -48,7 +48,7 @@ def init_collection(
     port: int = QDRANT_PORT,
     recreate: bool = False,
 ) -> None:
-    client = QdrantClient(host=host, port=port, prefer_grpc=True)
+    client = QdrantClient(host=host, port=port, prefer_grpc=False)
     collection_name = get_collection_name(bot_id)
     dim = get_embedding_dim()
 
@@ -68,12 +68,17 @@ def init_collection(
                 size=dim,
                 distance=Distance.COSINE,
             ),
-            optimizers_config=OptimizersConfig(
+            optimizers_config=OptimizersConfigDiff(
+                deleted_threshold=0.5,
+                vacuum_min_vector_number=1000,
+                default_segment_number=2,
                 indexing_threshold=0,  # Index everything for speed
+                flush_interval_sec=5,
             ),
-            hnsw_config=HnswConfig(
+            hnsw_config=HnswConfigDiff(
                 m=16,
                 ef_construct=200,
+                full_scan_threshold=10,
             ),
         )
         print(f"✓ Collection '{collection_name}' created")
@@ -82,7 +87,7 @@ def init_collection(
 
     # Verify
     info = client.get_collection(collection_name=collection_name)
-    print(f"  Vectors: {info.vectors_count}")
+    print(f"  Vectors: {info.indexed_vectors_count}")
     print(f"  Points:  {info.points_count}")
     print(f"  Status:  {info.status}")
 
