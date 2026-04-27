@@ -79,13 +79,16 @@ def check_qdrant_connection(host: str) -> None:
     import urllib.request
     import urllib.error
 
-    try:
-        url = f"http://{host}:6333/collections"
-        with urllib.request.urlopen(url, timeout=5) as r:
-            if r.status != 200:
-                fail(f"Qdrant responded with HTTP {r.status}")
-    except urllib.error.URLError as e:
-        fail(f"Cannot reach Qdrant at http://{host}:6333 — {e}")
+    # Try REST port (6334) first, fall back to gRPC port (6333)
+    for port in [6334, 6333]:
+        try:
+            url = f"http://{host}:{port}/collections"
+            with urllib.request.urlopen(url, timeout=5) as r:
+                if r.status == 200:
+                    return
+        except urllib.error.URLError:
+            continue
+    fail(f"Cannot reach Qdrant at http://{host}:6333 or http://{host}:6334")
 
 
 def main() -> None:

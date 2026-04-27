@@ -174,7 +174,7 @@ def _get_qdrant():
             host=QDRANT_HOST,
             port=QDRANT_PORT,
             timeout=10,
-            prefer_grpc=True,
+            prefer_grpc=False,
         )
     return _qdrant_client
 
@@ -236,10 +236,11 @@ class VectorMemory:
         vector = self.embedder.embed(text)
         now = datetime.now(timezone.utc).isoformat()
 
-        point = {
-            "id": memory_id,
-            "vector": vector,
-            "payload": {
+        from qdrant_client.models import PointStruct
+        point = PointStruct(
+            id=memory_id,
+            vector=vector,
+            payload={
                 "id": memory_id,
                 "text": text,
                 "memory_type": memory_type,
@@ -247,7 +248,7 @@ class VectorMemory:
                 "timestamp": now,
                 "metadata": metadata or {},
             },
-        }
+        )
 
         self.qdrant.upsert(
             collection_name=self.collection_name,
@@ -285,9 +286,9 @@ class VectorMemory:
                 ]
             )
 
-        results = self.qdrant.search(
+        results = self.qdrant.query_points(
             collection_name=self.collection_name,
-            query_vector=query_vector,
+            query=query_vector,
             limit=limit,
             query_filter=filter_cond,
             score_threshold=score_threshold,
@@ -295,16 +296,16 @@ class VectorMemory:
         )
 
         out = []
-        for r in results:
-            payload = r.payload
+        for point in results.points:
+            payload = point.payload
             out.append({
-                "id": payload.get("id", r.id),
+                "id": payload.get("id", point.id),
                 "text": payload.get("text", ""),
                 "memory_type": payload.get("memory_type", "manual"),
                 "tags": payload.get("tags", []),
                 "timestamp": payload.get("timestamp", ""),
                 "metadata": payload.get("metadata", {}),
-                "score": r.score,
+                "score": point.score,
             })
         return out
 
@@ -361,9 +362,10 @@ class VectorMemory:
 
     def delete(self, memory_id: str) -> dict:
         """Delete a memory by ID."""
+        from qdrant_client.models import PointIdsSelector
         self.qdrant.delete(
             collection_name=self.collection_name,
-            points_selector=[memory_id],
+            points_selector=PointIdsSelector(points=[memory_id]),
         )
         logger.info(f"[vector-memory] Deleted memory {memory_id}")
         return {"success": True, "memory_id": memory_id}
