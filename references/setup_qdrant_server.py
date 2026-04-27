@@ -27,7 +27,8 @@ def run(cmd, check=True, capture=False, timeout=120):
     print(f"  $ {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=capture, text=True, timeout=timeout)
     if check and result.returncode != 0:
-        print(f"  ✗ exit {result.returncode}: {result.stderr.strip()}")
+        err = (result.stderr or "").strip() or f"exit code {result.returncode}"
+        print(f"  ✗ {err}")
         sys.exit(1)
     return result.stdout.strip() if capture else ""
 
@@ -118,7 +119,7 @@ def download_binary(version):
     run(["curl", "-fL", "-o", str(tmp), url], timeout=300)
     info(f"Extracting to {QDRANT_HOME} …")
     QDRANT_HOME.mkdir(parents=True, exist_ok=True)
-    run(["tar", "-xzf", str(tmp), "-C", str(QDRANT_HOME), "--strip-components=1"])
+    run(["tar", "-xzf", str(tmp), "-C", str(QDRANT_HOME)])
     Path(tmp).unlink(missing_ok=True)
     ok("Binary installed")
 
@@ -339,7 +340,7 @@ def parse_args():
     p.add_argument("--docker", action="store_true", help="Use Docker instead of binary")
     p.add_argument("--cloud", choices=["digitalocean", "hetzner", "aws"],
                    help="Print cloud provider deployment guide")
-    p.add_argument("--version", default="v1.7.4", help="Qdrant version (default: v1.7.4)")
+    p.add_argument("--version", default="v1.17.1", help="Qdrant version (default: v1.17.1)")
     p.add_argument("--bind", default="0.0.0.0", help="Bind address (default: 0.0.0.0)")
     p.add_argument("--port", type=int, default=6333, help="gRPC port (default: 6333)")
     p.add_argument("--max-disk-space-gb", type=int, default=0,
@@ -384,7 +385,7 @@ def main():
             args.bind = ask("Bind address", "0.0.0.0")
             args.port = int(ask("gRPC port", "6333"))
             args.max_disk_space_gb = int(ask("Max disk (GB, 0=unlimited)", "0")) or None
-            args.version = ask("Qdrant version", "v1.7.4")
+            args.version = ask("Qdrant version", "v1.17.1")
         install_binary(args)
     else:
         install_docker(args)
