@@ -15,7 +15,7 @@ prerequisites:
     - QDRANT_PORT
     - QDRANT_COLLECTION
     - BOT_ID
-    - EMBEDDING_MODEL (optional, default: BAAI/bge-m3)
+    - EMBEDDING_MODEL (optional, default: all-MiniLM-L6-v2; 384dim, tested with sentence-transformers local embeddings)
     - EMBEDDING_PROVIDER (optional, default: local; other: openai, cohere)
     - OPENAI_API_KEY (if using openai embeddings)
     - COHERE_API_KEY (if using cohere embeddings)

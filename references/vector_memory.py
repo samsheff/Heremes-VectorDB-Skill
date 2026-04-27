@@ -31,7 +31,7 @@ QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
 QDRANT_COLLECTION_BASE = os.getenv("QDRANT_COLLECTION", "hermes_memory")
 BOT_ID = os.getenv("BOT_ID", "default")
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "BAAI/bge-m3")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
 EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "local").lower()
 
 # Derived
@@ -265,7 +265,7 @@ class VectorMemory:
         query: str,
         limit: int = 5,
         memory_type: Optional[str] = None,
-        score_threshold: float = 0.7,
+        score_threshold: float = 0.3,
     ) -> list[dict]:
         """
         Semantic search over memories.
@@ -404,7 +404,7 @@ class VectorMemory:
             query=current_topic,
             limit=limit,
             memory_type="session_summary",
-            score_threshold=0.65,
+            score_threshold=0.3,
         )
 
 
@@ -436,7 +436,7 @@ def search_memories(
     query: str,
     limit: int = 5,
     memory_type: Optional[str] = None,
-    score_threshold: float = 0.7,
+    score_threshold: float = 0.3,
 ) -> list[dict]:
     """Search memories using the default instance."""
     return _get_vm().search(query, limit, memory_type, score_threshold)
