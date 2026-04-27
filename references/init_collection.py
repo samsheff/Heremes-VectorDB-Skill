@@ -19,7 +19,7 @@ from qdrant_client.models import Distance, VectorParams, OptimizersConfigDiff, H
 
 
 QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
-QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
+QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6334"))
 QDRANT_COLLECTION_BASE = os.getenv("QDRANT_COLLECTION", "hermes_memory")
 
 

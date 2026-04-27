@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
-QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
+QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6334"))
 QDRANT_COLLECTION_BASE = os.getenv("QDRANT_COLLECTION", "hermes_memory")
 BOT_ID = os.getenv("BOT_ID", "default")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
